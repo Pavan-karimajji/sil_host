@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "common/common.pb.h"
 #include "df_interface_c.h"
 
 // Defined in modules/perception-core/src/platform/sil/perception_core_node.cpp,
@@ -9,6 +10,14 @@
 void run_sil_node();
 
 int main() {
+    // Proof that adas-interfaces' *generated* proto code (not just its hand-written
+    // headers) resolves through the Conan editable pointer into modules/interfaces'
+    // own build/generated/ tree - see plan.md item 12 discussion.
+    adas::common::Timestamp ts;
+    ts.set_seconds(42);
+    std::cout << "[sil] adas::common::Timestamp from adas-interfaces: seconds="
+              << ts.seconds() << "\n";
+
     std::cout << "[sil] ---- perception-core ----\n";
     run_sil_node();
 
