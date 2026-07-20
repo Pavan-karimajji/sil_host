@@ -1,0 +1,48 @@
+# Per-project x per-part toolchain/platform mapping for this component.
+#
+# sil is the SIL test-harness application - one fixed target (sil). Added
+# here per plan.md item 10 (docs/build_conanfile_commonization_plan.md
+# section 2.2) so build.py stops special-casing it: PROJECT is accepted (to
+# keep the same entry-point shape as every other component, matching
+# perception-core's own precedent) even though nothing branches on it yet.
+#
+# package_kind: application - conanfile.py has no build()/package() (the
+# real compile happens through build.py's own cmake --preset/--build calls,
+# not conan create), but settings/CMakeToolchain generation are still
+# needed.
+#
+# requires:/tool_requires: below are step 5's move of today's existing,
+# unchanged dependency list (protobuf, adas-interfaces) off a hardcoded
+# conanfile.py class attribute onto the same data-driven
+# requirements()/build_requirements() pattern df/vdy/perception-core already
+# use (docs/build_conanfile_commonization_plan.md §6 table) - same
+# dependencies, same versions, just declared as data now. Real
+# cross-component dependency wiring (adas-df/adas-vdy added HERE) is still
+# plan.md item 11, not this item - not touched.
+
+package_kind: application
+layout_kind: output_folder
+# No separate targets: field (§2.1a, revised 2026-07-20) - sil's one real
+# target is already its own explicit `sil:` key below with its own
+# platforms: list; build.py discovers it directly, no anchor needed since
+# there's only the one target.
+
+variants:
+  base:
+    requires:
+      - protobuf/3.21.12
+      - adas-interfaces/1.0.0
+    tool_requires:
+      - protobuf/3.21.12
+    sil:
+      platforms:
+        - build: vs2026
+  cus1:
+    requires:
+      - protobuf/3.21.12
+      - adas-interfaces/1.0.0
+    tool_requires:
+      - protobuf/3.21.12
+    sil:
+      platforms:
+        - build: vs2026
