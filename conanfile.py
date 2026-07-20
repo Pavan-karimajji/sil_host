@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.cmake import CMakeDeps, CMakeToolchain
+from conan.tools.cmake import CMakeDeps, CMakeToolchain, cmake_layout
 from pathlib import Path
 import re
 import yaml
@@ -38,6 +38,32 @@ class SilConan(ConanFile):
     def build_requirements(self):
         for ref in self._build_conf().get("tool_requires", []):
             self.tool_requires(ref)
+
+    def layout(self):
+        # plan.md item 11, docs/sil_dependency_wiring_plan.md - same
+        # conditional template copied into every component's conanfile.py
+        # (item 10's own philosophy), branching on this file's own
+        # layout_kind and Conan's own self.package_type (package_kind was
+        # removed from conf/build.yml entirely,
+        # docs/build_regression_tests.md §5). A no-op for this component
+        # (package_type "application" is never find_package()'d by another
+        # component) - kept for template consistency, not because anything
+        # here reads it yet.
+        conf_path = Path(self.recipe_folder) / "conf" / "build.yml"
+        conf = yaml.safe_load(conf_path.read_text(encoding="utf-8"))
+        layout_kind = conf.get("layout_kind", "output_folder")
+
+        if layout_kind == "cmake_layout":
+            cmake_layout(self)
+            self.cpp.source.includedirs = ["cpp"]
+            self.cpp.build.includedirs = ["generated"]
+        elif self.package_type in ("shared-library", "static-library"):
+            comp = self.name.replace("adas-", "")
+            platform = conf["variants"][str(self.options.project)]["sil"]["platforms"][0]["build"]
+            build_type = str(self.settings.build_type) if self.settings.get_safe("build_type") else "Release"
+            self.cpp.source.includedirs = [f"src/platform/{comp}_sil"]
+            self.cpp.build.libdirs = [f"build-sil-{platform}/src/platform/{comp}_sil/{build_type}"]
+            self.cpp.build.bindirs = [f"build-sil-{platform}/src/platform/{comp}_sil/{build_type}"]
 
     def set_version(self):
         cmakelists = Path(self.recipe_folder) / "CMakeLists.txt"

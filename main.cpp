@@ -2,12 +2,7 @@
 
 #include "common/common.pb.h"
 #include "df_interface_c.h"
-
-// Defined in modules/perception-core/src/platform/sil/perception_core_node.cpp,
-// linked directly against its already-built perception_core_sil.lib (see
-// CMakeLists.txt). Not declared in a header there, so forward-declared here
-// rather than pulling in perception-core's headers for one free function.
-void run_sil_node();
+#include "vdy_interface_c.h"
 
 int main() {
     // Proof that adas-interfaces' *generated* proto code (not just its hand-written
@@ -17,9 +12,6 @@ int main() {
     ts.set_seconds(42);
     std::cout << "[sil] adas::common::Timestamp from adas-interfaces: seconds="
               << ts.seconds() << "\n";
-
-    std::cout << "[sil] ---- perception-core ----\n";
-    run_sil_node();
 
     std::cout << "[sil] ---- df ----\n";
     std::cout << "[sil] dfApiVersion() = " << dfApiVersion() << "\n";
@@ -37,9 +29,26 @@ int main() {
     dfShutdown(handle);
     std::cout << "[sil] dfShutdown OK\n";
 
+    std::cout << "[sil] ---- vdy ----\n";
+    std::cout << "[sil] vdyApiVersion() = " << vdyApiVersion() << "\n";
+
+    void* vdyHandle = vdyInit(nullptr);
+    if (vdyHandle == nullptr) {
+        std::cerr << "[sil] vdyInit failed\n";
+        return 1;
+    }
+    std::cout << "[sil] vdyInit OK\n";
+
+    int vdyOk = vdyExec(vdyHandle, 0.01, nullptr, nullptr, nullptr);
+    std::cout << "[sil] vdyExec returned " << vdyOk << "\n";
+
+    vdyShutdown(vdyHandle);
+    std::cout << "[sil] vdyShutdown OK\n";
+
     std::cout << "[sil] ---- done ----\n"
-              << "[sil] Both components built, linked, initialized, ticked once, and "
+              << "[sil] df and vdy both built, linked, initialized, ticked once, and "
                  "shut down cleanly in one process. No data was exchanged between them "
-                 "(plan.md item 2 scope - real wiring is separate, later work).\n";
+                 "(structural only, this item's scope - real wiring is separate, later "
+                 "work).\n";
     return 0;
 }
