@@ -10,7 +10,7 @@ int main() {
     // own build/generated/ tree - see plan.md item 12 discussion.
     adas::common::Timestamp ts;
     ts.set_seconds(42);
-    std::cout << "[sil] adas::common::Timestamp from adas-interfaces: seconds="
+    std::cout << "[sil] adas::common::Timestamp from adas-interfaces: seconds=="
               << ts.seconds() << "\n";
 
     std::cout << "[sil] ---- df ----\n";
