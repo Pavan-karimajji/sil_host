@@ -17,6 +17,13 @@
 # generically, so no code change was needed to pick these up.
 
 layout_kind: output_folder
+
+# recipe: Conan-package identity read by the byte-identical conanfile.py
+# template (plan.md item 20, docs/conanfile_commonality_plan.md §7.2). The SIL
+# harness is an application - no consumable artifact, only package_type needed.
+recipe:
+  type: application
+
 # package_kind removed entirely (item 10's own follow-up finding, plan.md,
 # 2026-07-20) - conanfile.py's layout() now branches on Conan's own
 # self.package_type ("application") instead of a redundant second field.
